@@ -23,11 +23,22 @@ app.get('/', (req, res) => {
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
-    const collection = client.db(`${process.env.DB_NAME}`).collection("companies");
+    const companies = client.db(`${process.env.DB_NAME}`).collection("companies");
+    const services = client.db(`${process.env.DB_NAME}`).collection("services");
     console.log('database connected')
 
     app.get('/allcompanies', (req, res) => {
-        collection.find({})
+        companies.find({})
+          .toArray((err, documents) => {
+            res.send(documents);
+          })
+        console.log(err)
+        console.log('data loaded successfully')
+      })
+
+
+      app.get('/allservices', (req, res) => {
+        services.find({})
           .toArray((err, documents) => {
             res.send(documents);
           })
