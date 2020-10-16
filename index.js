@@ -64,6 +64,7 @@ client.connect(err => {
   })
 
   app.get('/findAdmin', (req, res) => {
+    console.log(req.query.email)
     admin.find({ email: req.query.email })
       .toArray((err, documents) => {
         res.send(documents)
@@ -106,6 +107,7 @@ client.connect(err => {
     const work = req.body.work;
     const details = req.body.details;
     const price = req.body.price;
+    const status= req.body.status;
     const ClientImg = fileOne.data;
     const encImgClient = ClientImg.toString('base64');
 
@@ -114,7 +116,7 @@ client.connect(err => {
       size: fileOne.size,
       img: Buffer.from(encImgClient, 'base64')
     };
-    customer.insertOne({ name, email, work, details, price,image })
+    customer.insertOne({ name, email, work, details, price,status,image })
       .then(result => {
         res.send(result.insertedCount > 0);
       })
@@ -152,6 +154,21 @@ client.connect(err => {
         console.log('admin added successfully')
       })
 
+  })
+  app.patch('/updateStatus/:id', (req, res) => {
+    console.log(req.body)
+    customer.updateOne({ _id: ObjectId(req.params.id) },
+      {
+        $set: { status: req.body.updateStatus}
+      }
+    )
+      .then(result =>{
+        console.log('status updated successfully')
+        console.log(result)
+        res.send(result)
+       
+        
+      })
   })
 
 });
