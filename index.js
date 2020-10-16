@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const ObjectId = require('mongodb').ObjectID;
+const fileUpload = require('express-fileupload');
 require('dotenv').config();
 
 
@@ -9,6 +10,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 const port = 5000;
+app.use(express.static('service'));
+app.use(fileUpload());
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.9obvp.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
@@ -25,6 +28,10 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
     const companies = client.db(`${process.env.DB_NAME}`).collection("companies");
     const services = client.db(`${process.env.DB_NAME}`).collection("services");
+    const feedback = client.db(`${process.env.DB_NAME}`).collection("feedback");
+    const admin = client.db(`${process.env.DB_NAME}`).collection("adminPanel");
+    
+    
     console.log('database connected')
 
     app.get('/allcompanies', (req, res) => {
@@ -45,6 +52,43 @@ client.connect(err => {
         console.log(err)
         console.log('data loaded successfully')
       })
+
+      app.get('/feedback', (req, res) => {
+        feedback.find({})
+          .toArray((err, documents) => {
+            res.send(documents);
+          })
+        console.log(err)
+        console.log('data loaded successfully')
+      })
+
+      app.get('/findAdmin', (req, res) => {
+        admin.find({email: req.query.email})
+        .toArray((err, documents)=> {
+          res.send(documents)
+      })
+    })
+
+
+    app.post('/addService', (req, res) => {
+      const file = req.files.file;
+      const name = req.body.name;
+      const description = req.body.description;
+      const newImg = file.data;
+      const encImg = newImg.toString('base64');
+
+      var image = {
+          contentType: file.mimetype,
+          size: file.size,
+          img: Buffer.from(encImg, 'base64')
+      };
+
+      services.insertOne({ name, description, image })
+          .then(result => {
+              res.send(result.insertedCount > 0);
+          })
+  })
+
 });
 
 app.listen(process.env.PORT || port);
