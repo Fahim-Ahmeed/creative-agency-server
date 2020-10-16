@@ -106,9 +106,6 @@ client.connect(err => {
     const work = req.body.work;
     const details = req.body.details;
     const price = req.body.price;
-    // const fileTwo = req.files.fileTwo;
-    // const ServiceImg=fileTwo.data;
-    // const encImgService=ServiceImg.toString('base64')
     const ClientImg = fileOne.data;
     const encImgClient = ClientImg.toString('base64');
 
@@ -117,11 +114,6 @@ client.connect(err => {
       size: fileOne.size,
       img: Buffer.from(encImgClient, 'base64')
     };
-  //  var sImage={
-  //   contentType: fileTwo.mimetype,
-  //   size: fileTwo.size,
-  //   img: Buffer.from(encImgService, 'base64')
-  //  }
     customer.insertOne({ name, email, work, details, price,image })
       .then(result => {
         res.send(result.insertedCount > 0);
