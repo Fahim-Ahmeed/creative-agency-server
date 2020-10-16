@@ -90,24 +90,39 @@ client.connect(err => {
       })
   })
 
-
+  app.get('/allCustomer', (req, res) => {
+    customer.find({})
+      .toArray((err, documents) => {
+        res.send(documents);
+      })
+    console.log(err)
+    console.log('customer loaded successfully')
+  })
+  
   app.post('/addCustomer', (req, res) => {
-    const file = req.files.file;
+    const fileOne = req.files.fileOne;
     const name = req.body.name;
     const email = req.body.email;
     const work = req.body.work;
     const details = req.body.details;
     const price = req.body.price;
-    const newImg = file.data;
-    const encImg = newImg.toString('base64');
+    // const fileTwo = req.files.fileTwo;
+    // const ServiceImg=fileTwo.data;
+    // const encImgService=ServiceImg.toString('base64')
+    const ClientImg = fileOne.data;
+    const encImgClient = ClientImg.toString('base64');
 
     var image = {
-      contentType: file.mimetype,
-      size: file.size,
-      img: Buffer.from(encImg, 'base64')
+      contentType: fileOne.mimetype,
+      size: fileOne.size,
+      img: Buffer.from(encImgClient, 'base64')
     };
-
-    customer.insertOne({ name, email, work, details, price, image })
+  //  var sImage={
+  //   contentType: fileTwo.mimetype,
+  //   size: fileTwo.size,
+  //   img: Buffer.from(encImgService, 'base64')
+  //  }
+    customer.insertOne({ name, email, work, details, price,image })
       .then(result => {
         res.send(result.insertedCount > 0);
       })
@@ -120,6 +135,34 @@ client.connect(err => {
       })
   })
 
+
+  
+  app.post('/addfeedback', (req, res) => {
+    const newFeedback = req.body;
+    console.log(newFeedback)
+    feedback.insertOne(newFeedback)
+      .then(result => {
+        if (result.insertedCount > 0) {
+          res.send(result)
+        }
+        console.log('feedback added successfully')
+      })
+
+  })
+
+
+  app.post('/makeAdmin', (req, res) => {
+    admin.insertOne(req.body)
+      .then(result => {
+        if (result.insertedCount > 0) {
+          res.send(result)
+        }
+        console.log('admin added successfully')
+      })
+
+  })
+
 });
+
 
 app.listen(process.env.PORT || port);
